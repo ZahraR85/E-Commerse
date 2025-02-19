@@ -12,7 +12,7 @@ const Navbar = () => {
       </Link>
 
       <div className="flex gap-4">
-        <Link to="/products">Products</Link>
+        <Link to="/product/:id">Products</Link>
 
         {role === "admin" && <Link to="/admin">Admin Panel</Link>}
 

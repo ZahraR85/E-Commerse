@@ -11,8 +11,9 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
+      console.log("Stored User:", parsedUser);
       setUser(parsedUser);
-      setRole(parsedUser.role); // Set role
+      setRole(parsedUser.role); // Ensure this is correctly set
     }
   }, []);
 
