@@ -8,14 +8,15 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      console.log("Stored User:", parsedUser);
-      setUser(parsedUser);
-      setRole(parsedUser.role); // Ensure this is correctly set
+      console.log("Stored User:", storedUser);
+      setRole(storedUser.role || "user"); // Default to "user" if undefined
     }
   }, []);
+
+  console.log("AuthContext - User:", user);
+  console.log("AuthContext - Role:", role);
 
   // Register function (send request to backend)
   const register = async (userData) => {
@@ -28,9 +29,9 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data)); // Save user & role
-        setUser(data);
-        setRole(data.role);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setUser(data.user);
+        setRole(data.user.role); // Make sure to set the role
       } else {
         console.error(data.message);
       }
@@ -69,7 +70,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, register, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, role, register, setUser, setRole, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

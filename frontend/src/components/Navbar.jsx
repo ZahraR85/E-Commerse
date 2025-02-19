@@ -14,7 +14,11 @@ const Navbar = () => {
       <div className="flex gap-4">
         <Link to="/product/:id">Products</Link>
 
-        {role === "admin" && <Link to="/admin">Admin Panel</Link>}
+        {role === "admin" && (
+          <Link to="/admin" className="px-4">
+            Admin Panel
+          </Link>
+        )}
 
         {user ? (
           <button onClick={logout} className="bg-red-500 px-3 py-1 rounded">
