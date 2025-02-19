@@ -15,8 +15,8 @@ const Navbar = () => {
         <Link to="/product/:id">Products</Link>
 
         {role === "admin" && (
-          <Link to="/admin" className="px-4">
-            Admin Panel
+          <Link to="/admin/dashboard" className="mr-4 text-yellow-400">
+            Admin Dashboard
           </Link>
         )}
 

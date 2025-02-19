@@ -3,75 +3,78 @@ import { createContext, useState, useEffect } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null); // Add role state
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Check if user is already logged in (from localStorage)
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      console.log("Stored User:", storedUser);
-      setRole(storedUser.role || "user"); // Default to "user" if undefined
-    }
-  }, []);
-
-  console.log("AuthContext - User:", user);
-  console.log("AuthContext - Role:", role);
-
+  const [token, setToken] = useState(
+    () => localStorage.getItem("token") || null
+  );
+  const [role, setRole] = useState(() => localStorage.getItem("role") || null);
   // Register function (send request to backend)
-  const register = async (userData) => {
+  const register = async (name, email, password, role = "user") => {
     try {
-      const response = await fetch("http://localhost:3000/auth/register", {
+      const res = await fetch("http://localhost:3000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ name, email, password, role }),
       });
-      const data = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setUser(data.user);
-        setRole(data.user.role); // Make sure to set the role
-      } else {
-        console.error(data.message);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Registration failed");
+
+      // Save user data
+      setUser(data.user);
+      setToken(data.token);
+      setRole(data.user.role);
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.user.role);
     } catch (error) {
-      console.error("Registration failed:", error);
+      console.error("Registration Error:", error.message);
     }
   };
 
-  // Login function (send request to backend)
-  const login = async (userData) => {
+  // Login function
+  const login = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:3000/auth/login", {
+      const res = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ email, password }),
       });
-      const data = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data)); // Save user & role
-        setUser(data);
-        setRole(data.role);
-      } else {
-        console.error(data.message);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Login failed");
+
+      // Save user data
+      setUser(data.user);
+      setToken(data.token);
+      setRole(data.user.role); // Make sure the backend sends `role`
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.user.role);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Login Error:", error.message);
     }
   };
 
-  // Logout function (clear user session)
+  // Logout function
   const logout = () => {
-    localStorage.removeItem("user");
     setUser(null);
+    setToken(null);
     setRole(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, role, register, setUser, setRole, login, logout }}
+      value={{ user, token, role, register, login, logout }}
     >
       {children}
     </AuthContext.Provider>
