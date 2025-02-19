@@ -4,35 +4,63 @@ import User from "../models/User.js";
 
 const JWT_SECRET = "your_secret_key"; // Store in .env
 
-// Register User
 export const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-        const userExists = await User.findOne({ email });
-        if (userExists) return res.status(400).json({ message: "User already exists" });
+  try {
+    const { name, email, password, role } = req.body;
 
-        const user = new User({ name, email, password });
-        await user.save();
+    // Default role to "user" if not provided
+    const assignedRole = role || "user";
 
-        res.status(201).json({ message: "User registered successfully" });
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
     }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: assignedRole,
+    });
+
+    // Generate token
+    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role },
+      token,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
-// Login User
+
 export const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: "Invalid credentials" });
+  const { email, password } = req.body;
+  try {
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
-        res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+      res.json({
+          token,
+          user: { id: user._id, name: user.name, email: user.email, role: user.role } // ✅ Include role
+      });
+  } catch (error) {
+      res.status(500).json({ message: "Server error" });
+  }
 };
