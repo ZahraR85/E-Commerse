@@ -4,12 +4,15 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null); // Add role state
 
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setRole(parsedUser.role); // Set role
     }
   }, []);
 
@@ -24,8 +27,9 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data)); // Save token
+        localStorage.setItem("user", JSON.stringify(data)); // Save user & role
         setUser(data);
+        setRole(data.role);
       } else {
         console.error(data.message);
       }
@@ -45,8 +49,9 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data)); // Save token
+        localStorage.setItem("user", JSON.stringify(data)); // Save user & role
         setUser(data);
+        setRole(data.role);
       } else {
         console.error(data.message);
       }
@@ -59,10 +64,11 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);
+    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, register, login, logout }}>
+    <AuthContext.Provider value={{ user, role, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
