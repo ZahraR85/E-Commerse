@@ -1,22 +1,39 @@
 import express from "express";
 import {
-  createProduct,
-  getAllProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
+    createProduct,
+    getAllProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct,
 } from "../controllers/productController.js";
 import fileUploader from "../middleware/fileUploader.js";
 import cloudUploader from "../middleware/cloudinaryMultiple.js";
+
 const router = express.Router();
 
-router.post("/", fileUploader.array("images", 15), (req, res, next) => {
-  console.log("Files before Cloudinary upload:", req.files); // Debugging
-  next();
-}, cloudUploader, createProduct);
-router.get("/", getAllProducts); // Get all products
-router.get("/:id", getProductById); // Get a product by ID
-router.put("/:id", fileUploader.array("images", 15), cloudUploader, updateProduct); // Update a product
-router.delete("/:id", deleteProduct); // Delete a product
+// Create a product (uploads images)
+router.post(
+    "/",
+    fileUploader.array("images", 15), // Handle multiple files
+    cloudUploader, // Upload images to Cloudinary
+    createProduct
+);
+
+// Get all products
+router.get("/", getAllProducts);
+
+// Get a product by ID
+router.get("/:id", getProductById);
+
+// Update a product (with new images)
+router.put(
+    "/:id",
+    fileUploader.array("images", 15), 
+    cloudUploader,
+    updateProduct
+);
+
+// Delete a product
+router.delete("/:id", deleteProduct);
 
 export default router;

@@ -1,23 +1,23 @@
-import { existsSync, mkdirSync } from 'fs';
-import multer from 'multer';
+import multer from "multer";
 
-//10MB
+// 10MB limit
 const fileSize = 10 * 1024 * 1024;
+const allowedMimeTypes = ["image/png", "image/jpeg"];
 
-const allowedMimeTypes = ['image/png', 'image/jpeg'];
-
+// Filter files by type
 function fileFilter(req, file, cb) {
-    // To accept the file pass `true`, like so:
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        // You can always pass an error if something goes wrong:
-        cb(new Error('Only jpeg or png images are allowed.'));
+        cb(new Error("Only JPEG or PNG images are allowed."));
     }
 }
 
-const storage = multer.memoryStorage();
-
-const fileUploader = multer({ storage, limits: { fileSize }, fileFilter });
+// Use memory storage
+const fileUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize },
+    fileFilter,
+});
 
 export default fileUploader;

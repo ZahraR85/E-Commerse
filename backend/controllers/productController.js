@@ -5,8 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 export const createProduct = async (req, res) => {
   try {
       const { name, description, price, category, subcategory } = req.body;
-
-      const images = req.cloudinaryURLs || []; // Get uploaded images
+      const images = req.cloudinaryURLs || []; // Cloudinary image URLs
 
       const newProduct = new Product({
           name,
@@ -14,7 +13,7 @@ export const createProduct = async (req, res) => {
           price,
           category,
           subcategory,
-          images, // Use images from Cloudinary
+          image: images, // Correctly store images
       });
 
       await newProduct.save();
