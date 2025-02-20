@@ -15,6 +15,8 @@ cloudinary.config({
 // Upload multiple images to Cloudinary
 const cloudUploader = async (req, res, next) => {
     try {
+      console.log("Request body:", req.body); // Log request body
+      console.log("Request files:", req.files); // Log uploaded files
         if (!req.files || req.files.length === 0) {
             throw new ErrorResponse("Please upload at least one image.", 400);
         }
