@@ -1,13 +1,24 @@
 import Product from "../models/Product.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
-    await product.save();
-    res.status(201).json(product);
+    const { name, description, price, category, subcategory, images } = req.body;
+    
+    const newProduct = new Product({
+      name,
+      description,
+      price,
+      category,
+      subcategory,
+      images, // Already uploaded in frontend
+    });
+
+    await newProduct.save();
+    res.status(201).json(newProduct);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: "Error adding product", error });
   }
 };
 

@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { v2 as cloudinary } from 'cloudinary';
-import ErrorResponse from '../utils/ErrorResponse.js';
+//import ErrorResponse from '../utils/ErrorResponse.js';
 
 // Configuration
 cloudinary.config({

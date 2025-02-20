@@ -13,14 +13,15 @@ const Admin = () => {
     name: "",
     description: "",
     price: "",
-    image: "",
+    images: [],
     category: "",
     subcategory: "",
   });
+  const [imageFiles, setImageFiles] = useState([]);
 
   useEffect(() => {
     if (!user || role !== "admin") {
-      navigate("/"); // Redirect to home if not an admin
+      navigate("/");
     } else {
       fetchCategories();
     }
@@ -48,7 +49,7 @@ const Admin = () => {
       });
 
       if (response.ok) {
-        fetchCategories(); // Refresh categories after adding
+        fetchCategories();
         setCategoryName("");
         setSubcategories("");
       }
@@ -57,12 +58,35 @@ const Admin = () => {
     }
   };
 
+  const uploadImagesToCloudinary = async () => {
+    const uploadedImages = [];
+    for (let file of imageFiles) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "your_upload_preset"); // Replace with Cloudinary upload preset
+
+      try {
+        const response = await fetch(
+          "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
+          { method: "POST", body: formData }
+        );
+        const data = await response.json();
+        uploadedImages.push(data.secure_url);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+    return uploadedImages;
+  };
+
   const handleAddProduct = async () => {
+    const uploadedImages = await uploadImagesToCloudinary();
+
     try {
       const response = await fetch("http://localhost:3000/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData),
+        body: JSON.stringify({ ...productData, images: uploadedImages }),
       });
 
       if (response.ok) {
@@ -70,10 +94,11 @@ const Admin = () => {
           name: "",
           description: "",
           price: "",
-          image: "",
+          images: [],
           category: "",
           subcategory: "",
         });
+        setImageFiles([]);
       }
     } catch (error) {
       console.error("Error adding product:", error);
