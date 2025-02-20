@@ -14,12 +14,15 @@ const router = express.Router();
 // Create a product (uploads images)
 router.post(
   "/",
-  fileUploader.array("images", 15), // Ensure this matches the Postman key
+  fileUploader.array("images", 15), // Handle multiple files
   (req, res, next) => {
-      console.log("Multer processed files:", req.files); // Debug
+      console.log("Middleware Debug - Received files:", req.files); // Check files
+      if (!req.files) {
+          return res.status(400).json({ error: "No files uploaded" });
+      }
       next();
   },
-  cloudUploader,
+  cloudUploader, // Upload images to Cloudinary
   createProduct
 );
 

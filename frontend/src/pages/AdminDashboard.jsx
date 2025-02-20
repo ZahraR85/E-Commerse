@@ -73,7 +73,7 @@ const Admin = () => {
     for (let file of imageFiles) {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "your_upload_preset");
+      formData.append("upload_preset", "ml_default");
 
       try {
         const response = await fetch(
