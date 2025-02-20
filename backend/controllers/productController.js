@@ -4,21 +4,23 @@ import { v2 as cloudinary } from "cloudinary";
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, price, category, subcategory, images } = req.body;
-    
-    const newProduct = new Product({
-      name,
-      description,
-      price,
-      category,
-      subcategory,
-      images, // Already uploaded in frontend
-    });
+      const { name, description, price, category, subcategory } = req.body;
 
-    await newProduct.save();
-    res.status(201).json(newProduct);
+      const images = req.cloudinaryURLs || []; // Get uploaded images
+
+      const newProduct = new Product({
+          name,
+          description,
+          price,
+          category,
+          subcategory,
+          images, // Use images from Cloudinary
+      });
+
+      await newProduct.save();
+      res.status(201).json(newProduct);
   } catch (error) {
-    res.status(500).json({ message: "Error adding product", error });
+      res.status(500).json({ message: "Error adding product", error });
   }
 };
 

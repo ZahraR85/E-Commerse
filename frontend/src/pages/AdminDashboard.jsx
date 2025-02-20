@@ -57,17 +57,27 @@ const Admin = () => {
       console.error("Error adding category:", error);
     }
   };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProductData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageFiles([...imageFiles, ...files]);
+  };
 
   const uploadImagesToCloudinary = async () => {
     const uploadedImages = [];
+
     for (let file of imageFiles) {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "your_upload_preset"); // Replace with Cloudinary upload preset
+      formData.append("upload_preset", "your_upload_preset");
 
       try {
         const response = await fetch(
-          "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
+          "https://api.cloudinary.com/v1_1/ddx3jbnt2/image/upload",
           { method: "POST", body: formData }
         );
         const data = await response.json();
@@ -76,6 +86,7 @@ const Admin = () => {
         console.error("Error uploading image:", error);
       }
     }
+
     return uploadedImages;
   };
 
@@ -138,63 +149,50 @@ const Admin = () => {
 
           {/* Add Product */}
           <div className="flex-3 ml-4 border-4 p-4 border-rounded">
-            <h2 className="text-xl font-semibold">Add Product</h2>
+            <h2 className="text-xl font-bold mb-4">Add Product</h2>
             <input
               type="text"
-              placeholder="Product Name"
+              name="name"
               value={productData.name}
-              onChange={(e) =>
-                setProductData({ ...productData, name: e.target.value })
-              }
-              className="border p-2 rounded w-full"
+              onChange={handleInputChange}
+              placeholder="Product Name"
+              className="border p-2 rounded w-full mb-2"
             />
-            <input
-              type="text"
-              placeholder="Description"
+            <textarea
+              name="description"
               value={productData.description}
-              onChange={(e) =>
-                setProductData({ ...productData, description: e.target.value })
-              }
-              className="border p-2 rounded w-full mt-2"
-            />
+              onChange={handleInputChange}
+              placeholder="Description"
+              className="border p-2 rounded w-full mb-2"
+            ></textarea>
             <input
               type="number"
-              placeholder="Price"
+              name="price"
               value={productData.price}
-              onChange={(e) =>
-                setProductData({ ...productData, price: e.target.value })
-              }
-              className="border p-2 rounded w-full mt-2"
-            />
-            <input
-              type="text"
-              placeholder="Image URL"
-              value={productData.image}
-              onChange={(e) =>
-                setProductData({ ...productData, image: e.target.value })
-              }
-              className="border p-2 rounded w-full mt-2"
+              onChange={handleInputChange}
+              placeholder="Price"
+              className="border p-2 rounded w-full mb-2"
             />
             <input
               type="file"
               multiple
-              onChange={(e) =>
-                setProductData({ ...productData, image: e.target.value })
-              }
-              className="border mx-2 p-2 text-sm lg:text-lg rounded w-full text-BgFont border-BgPinkDark focus:outline-none focus:ring focus:ring-BgPinkDark"
+              onChange={handleImageChange}
+              className="border p-2 rounded w-full mb-2"
             />
-            <div className="flex flex-wrap gap-2 lg:mt-2 mt-1">
-              {newImageFiles.map((file, index) => (
+            <div className="flex flex-wrap gap-2">
+              {imageFiles.map((file, index) => (
                 <div key={index} className="relative">
                   <img
                     src={URL.createObjectURL(file)}
                     alt="Preview"
-                    className="w-16 h-16 object-cover rounded "
+                    className="w-16 h-16 object-cover rounded"
                   />
                   <button
                     type="button"
-                    onClick={() => removeNewImage(index)}
-                    className="absolute top-0 right-0 text-sm lg:text-lg text-white bg-red-600 rounded-full w-6 h-6 flex items-center justify-center"
+                    onClick={() =>
+                      setImageFiles(imageFiles.filter((_, i) => i !== index))
+                    }
+                    className="absolute top-0 right-0 text-white bg-red-600 rounded-full w-6 h-6 flex items-center justify-center"
                   >
                     &times;
                   </button>
@@ -232,10 +230,9 @@ const Admin = () => {
                   </option>
                 ))}
             </select>
-
             <button
               onClick={handleAddProduct}
-              className="bg-green-500 text-white px-4 py-2 mt-2 rounded"
+              className="bg-blue-500 text-white p-2 rounded w-full mt-2"
             >
               Add Product
             </button>

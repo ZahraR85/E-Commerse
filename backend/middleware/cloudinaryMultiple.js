@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { v2 as cloudinary } from 'cloudinary';
-//import ErrorResponse from '../utils/ErrorResponse.js';
+import ErrorResponse from '../utils/ErrorResponse.js';
 
 // Configuration
 cloudinary.config({
@@ -10,25 +10,24 @@ cloudinary.config({
     secure_url: true,
 });
 
-// Upload multiple images
+// 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=='
+
+// Upload an image
 const cloudUploader = async (req, res, next) => {
     try {
-        req.files = req.files || [];
-        const uploadPromises = req.files?.map(async (file) => {
-            const b64 = Buffer.from(file.buffer).toString('base64');
-            const dataURI = 'data:' + file.mimetype + ';base64,' + b64;
+        if (!req.file) throw new ErrorResponse('Please upload a file.', 400);
 
-            const cloudinaryData = await cloudinary.uploader.upload(dataURI, {
-                resource_type: 'auto',
-            });
+        const b64 = Buffer.from(req.file.buffer).toString('base64');
+        const dataURI = 'data:' + req.file.mimetype + ';base64,' + b64;
 
-            return cloudinaryData.secure_url;
+        const cloudinaryData = await cloudinary.uploader.upload(dataURI, {
+            resource_type: 'auto',
         });
 
-        const cloudinaryURLs = await Promise.all(uploadPromises);
+        console.log(cloudinaryData);
 
-        req.cloudinaryURLs = cloudinaryURLs;
-console.log(cloudinaryURLs);
+        req.cloudinaryURL = cloudinaryData.secure_url;
+
         next();
     } catch (error) {
         next(error);

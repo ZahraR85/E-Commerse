@@ -10,7 +10,10 @@ import fileUploader from "../middleware/fileUploader.js";
 import cloudUploader from "../middleware/cloudinaryMultiple.js";
 const router = express.Router();
 
-router.post("/", fileUploader.array("images", 15), cloudUploader, createProduct); // Create a new product
+router.post("/", fileUploader.array("images", 15), (req, res, next) => {
+  console.log("Files before Cloudinary upload:", req.files); // Debugging
+  next();
+}, cloudUploader, createProduct);
 router.get("/", getAllProducts); // Get all products
 router.get("/:id", getProductById); // Get a product by ID
 router.put("/:id", fileUploader.array("images", 15), cloudUploader, updateProduct); // Update a product
