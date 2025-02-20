@@ -70,7 +70,7 @@ const Register = () => {
         />
 
         {/* Role Selection (Only for testing, remove in production) */}
-        <select
+        {/* <select
           name="role"
           value={formData.role}
           onChange={handleChange}
@@ -78,7 +78,7 @@ const Register = () => {
         >
           <option value="user">User</option>
           <option value="admin">Admin</option>
-        </select>
+        </select>*/}
 
         <button
           type="submit"

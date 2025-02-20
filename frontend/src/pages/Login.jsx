@@ -17,7 +17,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(formData);
+    // Pass email and password directly, not inside formData
+    await login(formData.email, formData.password);
     navigate("/"); // Redirect to home after login
   };
 
